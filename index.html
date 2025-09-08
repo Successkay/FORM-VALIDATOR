@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Form Validator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-r from-blue-100 to-purple-100 min-h-screen flex items-center justify-center relative overflow-hidden">
+
+  <!-- Animated Gradient Bubbles -->
+  <div class="absolute inset-0 pointer-events-none z-20">
+    <span class="absolute rounded-full bg-blue-400 opacity-90 blur-[80px] animate-bubbleX1" style="width:160px;height:160px;top:10%;left:0%;"></span>
+    <span class="absolute rounded-full bg-purple-400 opacity-90 blur-[80px] animate-bubbleX2" style="width:220px;height:220px;top:60%;left:0%;"></span>
+    <span class="absolute rounded-full bg-pink-400 opacity-80 blur-[80px] animate-bubbleX3" style="width:130px;height:130px;top:80%;left:0%;"></span>
+    <span class="absolute rounded-full bg-blue-300 opacity-80 blur-[80px] animate-bubbleX4" style="width:110px;height:110px;top:30%;left:0%;"></span>
+    <span class="absolute rounded-full bg-purple-300 opacity-80 blur-[80px] animate-bubbleX5" style="width:150px;height:150px;top:50%;left:0%;"></span>
+  </div>
+
+  <div class="bg-white/30 backdrop-blur-lg border border-white/40 p-8 rounded-2xl shadow-2xl w-full max-w-md z-30">
+    <h2 class="text-2xl font-bold text-gray-700 text-center mb-6"> Register </h2>
+
+    <form id="registerForm" class="space-y-5">
+      <!-- Username -->
+      <div>
+        <label class="block text-gray-600 mb-1">Username</label>
+        <input type="text" id="username" placeholder="Enter username"
+          class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none" aria-describedby="usernameError">
+        <p id="usernameError" class="text-sm text-red-500 mt-1 hidden" aria-live="polite"></p>
+      </div>
+      <!-- Email -->
+      <div>
+        <label class="block text-gray-600 mb-1">Email</label>
+        <input type="email" id="email" placeholder="Enter email"
+          class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none" aria-describedby="emailError">
+        <p id="emailError" class="text-sm text-red-500 mt-1 hidden" aria-live="polite"></p>
+      </div>
+      <!-- Password -->
+      <div>
+        <label class="block text-gray-600 mb-1">Password</label>
+        <div class="relative">
+          <input type="password" id="password" placeholder="Enter password"
+            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none pr-10" aria-describedby="passwordError">
+          <button type="button" id="togglePassword" tabindex="-1"
+            class="absolute right-2 top-2 text-gray-400 hover:text-blue-500 text-lg focus:outline-none" aria-label="Show or hide password">👁️</button>
+        </div>
+        <p id="passwordError" class="text-sm text-red-500 mt-1 hidden" aria-live="polite"></p>
+        <!-- Strength Bar -->
+        <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+          <div id="strengthBar" class="h-2 rounded-full w-0 bg-red-500"></div>
+        </div>
+        <p id="strengthText" class="text-sm mt-1 text-gray-500">Strength: N/A</p>
+      </div>
+      <!-- Confirm Password -->
+      <div>
+        <label class="block text-gray-600 mb-1">Confirm Password</label>
+        <div class="relative">
+          <input type="password" id="confirmPassword" placeholder="Re-enter password"
+            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none pr-10" aria-describedby="confirmError">
+          <button type="button" id="toggleConfirm" tabindex="-1"
+            class="absolute right-2 top-2 text-gray-400 hover:text-blue-500 text-lg focus:outline-none" aria-label="Show or hide confirm password">👁️</button>
+        </div>
+        <p id="confirmError" class="text-sm text-red-500 mt-1 hidden" aria-live="polite"></p>
+      </div>
+      <!-- Submit -->
+      <button type="submit"
+        class="w-full py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg" id="submitBtn">
+        Register
+      </button>
+      <!-- Dark mode toggle -->
+      <button type="button" id="darkToggle" class="w-full py-2 mt-2 bg-gray-700 hover:bg-gray-800 text-white font-semibold rounded-lg">
+        Toggle Dark Mode
+      </button>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById("registerForm");
+    const username = document.getElementById("username");
+    const email = document.getElementById("email");
+    const password = document.getElementById("password");
+    const confirmPassword = document.getElementById("confirmPassword");
+
+    const usernameError = document.getElementById("usernameError");
+    const emailError = document.getElementById("emailError");
+    const passwordError = document.getElementById("passwordError");
+    const confirmError = document.getElementById("confirmError");
+
+    const strengthBar = document.getElementById("strengthBar");
+    const strengthText = document.getElementById("strengthText");
+
+    const submitBtn = document.getElementById("submitBtn");
+    const togglePassword = document.getElementById("togglePassword");
+    const toggleConfirm = document.getElementById("toggleConfirm");
+    const darkToggle = document.getElementById("darkToggle");
+
+    // Haptic feedback utility
+    function haptic() {
+      if (navigator.vibrate) navigator.vibrate(30);
+    }
+
+    // Show/hide password
+    togglePassword.addEventListener("click", () => {
+      password.type = password.type === "password" ? "text" : "password";
+      togglePassword.textContent = password.type === "password" ? "👁️" : "🙈";
+      haptic();
+    });
+    toggleConfirm.addEventListener("click", () => {
+      confirmPassword.type = confirmPassword.type === "password" ? "text" : "password";
+      toggleConfirm.textContent = confirmPassword.type === "password" ? "👁️" : "🙈";
+      haptic();
+    });
+
+    // Dark mode toggle
+    darkToggle.addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+      haptic();
+    });
+
+    function checkPasswordStrength(pass) {
+      let score = 0;
+      if (pass.length >= 8) score++;
+      if (/[A-Z]/.test(pass)) score++;
+      if (/[a-z]/.test(pass)) score++;
+      if (/[0-9]/.test(pass)) score++;
+      if (/[^A-Za-z0-9]/.test(pass)) score++;
+
+      if (score <= 2) {
+        strengthBar.style.width = "33%";
+        strengthBar.className = "h-2 rounded-full bg-red-500";
+        strengthText.innerText = "Strength: Weak";
+        strengthText.className = "text-sm text-red-500";
+      } else if (score === 3 || score === 4) {
+        strengthBar.style.width = "66%";
+        strengthBar.className = "h-2 rounded-full bg-yellow-500";
+        strengthText.innerText = "Strength: Medium";
+        strengthText.className = "text-sm text-yellow-600";
+      } else {
+        strengthBar.style.width = "100%";
+        strengthBar.className = "h-2 rounded-full bg-green-500";
+        strengthText.innerText = "Strength: Strong";
+        strengthText.className = "text-sm text-green-600";
+      }
+    }
+
+    password.addEventListener("input", () => checkPasswordStrength(password.value));
+
+    // Real-time validation
+    username.addEventListener("input", () => {
+      if (username.value.trim().length < 3) {
+        usernameError.innerText = "Username must be at least 3 characters.";
+        usernameError.classList.remove("hidden");
+      } else {
+        usernameError.classList.add("hidden");
+      }
+    });
+    email.addEventListener("input", () => {
+      const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
+      if (!email.value.match(emailPattern)) {
+        emailError.innerText = "Enter a valid email address.";
+        emailError.classList.remove("hidden");
+      } else {
+        emailError.classList.add("hidden");
+      }
+    });
+    password.addEventListener("input", () => {
+      checkPasswordStrength(password.value);
+      if (password.value.length < 8) {
+        passwordError.innerText = "Password must be at least 8 characters.";
+        passwordError.classList.remove("hidden");
+      } else {
+        passwordError.classList.add("hidden");
+      }
+      // Also check confirm password match in real-time
+      if (confirmPassword.value && password.value !== confirmPassword.value) {
+        confirmError.innerText = "Passwords do not match.";
+        confirmError.classList.remove("hidden");
+      } else {
+        confirmError.classList.add("hidden");
+      }
+    });
+    confirmPassword.addEventListener("input", () => {
+      if (password.value !== confirmPassword.value) {
+        confirmError.innerText = "Passwords do not match.";
+        confirmError.classList.remove("hidden");
+      } else {
+        confirmError.classList.add("hidden");
+      }
+    });
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      let valid = true;
+
+      // Username validation
+      if (username.value.trim().length < 3) {
+        usernameError.innerText = "Username must be at least 3 characters.";
+        usernameError.classList.remove("hidden");
+        valid = false;
+        haptic();
+      } else {
+        usernameError.classList.add("hidden");
+      }
+
+      // Email validation
+      const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
+      if (!email.value.match(emailPattern)) {
+        emailError.innerText = "Enter a valid email address.";
+        emailError.classList.remove("hidden");
+        valid = false;
+        haptic();
+      } else {
+        emailError.classList.add("hidden");
+      }
+
+      // Password validation
+      if (password.value.length < 8) {
+        passwordError.innerText = "Password must be at least 8 characters.";
+        passwordError.classList.remove("hidden");
+        valid = false;
+        haptic();
+      } else {
+        passwordError.classList.add("hidden");
+      }
+
+      // Confirm Password
+      if (password.value !== confirmPassword.value) {
+        confirmError.innerText = "Passwords do not match.";
+        confirmError.classList.remove("hidden");
+        valid = false;
+        haptic();
+      } else {
+        confirmError.classList.add("hidden");
+      }
+
+      if (valid) {
+        // Show modal instead of alert, include email in message
+        document.getElementById("modalEmail").innerText = email.value;
+        document.getElementById("successModal").classList.remove("hidden");
+        form.reset();
+        strengthBar.style.width = "0";
+        strengthText.innerText = "Strength: N/A";
+        strengthText.className = "text-sm text-gray-500";
+        haptic();
+      }
+    });
+
+    // Close modal handler
+    function closeModal() {
+      document.getElementById("successModal").classList.add("hidden");
+    }
+  </script>
+
+  <!-- Success Modal -->
+  <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 w-96 text-center border-2 border-blue-300 relative">
+      <div class="text-green-500 text-5xl mb-3 animate-bounce">✅</div>
+      <div class="text-xl font-bold mb-2 text-gray-700">Registration Successful!</div>
+      <div class="text-base text-gray-600 mb-4">
+        Please check your email <span id="modalEmail" class="font-semibold text-blue-600"></span> for verification.
+      </div>
+      <button onclick="closeModal()" class="mt-2 px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow transition">
+        OK
+      </button>
+      <span onclick="closeModal()" class="absolute top-2 right-3 text-gray-400 hover:text-gray-700 text-xl cursor-pointer">&times;</span>
+    </div>
+  </div>
+
+  <style>
+    @keyframes bubbleX1 {
+      0% { left: 0%; }
+      50% { left: 80%; }
+      100% { left: 0%; }
+    }
+    @keyframes bubbleX2 {
+      0% { left: 0%; }
+      50% { left: 70%; }
+      100% { left: 0%; }
+    }
+    @keyframes bubbleX3 {
+      0% { left: 0%; }
+      50% { left: 85%; }
+      100% { left: 0%; }
+    }
+    @keyframes bubbleX4 {
+      0% { left: 0%; }
+      50% { left: 75%; }
+      100% { left: 0%; }
+    }
+    @keyframes bubbleX5 {
+      0% { left: 0%; }
+      50% { left: 65%; }
+      100% { left: 0%; }
+    }
+    .animate-bubbleX1 { animation: bubbleX1 10s linear infinite; }
+    .animate-bubbleX2 { animation: bubbleX2 14s linear infinite; }
+    .animate-bubbleX3 { animation: bubbleX3 12s linear infinite; }
+    .animate-bubbleX4 { animation: bubbleX4 9s linear infinite; }
+    .animate-bubbleX5 { animation: bubbleX5 16s linear infinite; }
+    /* Ensure bubbles are visible behind the form */
+    .z-20 { z-index: 20; }
+    .z-30 { z-index: 30; }
+
+    body.dark {
+      background: linear-gradient(to right, #232946, #4f5d75);
+      color: #eaeaea;
+    }
+    body.dark .bg-white\/30 {
+      background: rgba(34, 41, 70, 0.7);
+      border-color: #232946;
+    }
+    body.dark .text-gray-700, body.dark .text-gray-600 {
+      color: #eaeaea !important;
+    }
+    body.dark .bg-blue-500 {
+      background-color: #232946 !important;
+    }
+    body.dark .bg-blue-600 {
+      background-color: #4f5d75 !important;
+    }
+    body.dark .bg-gray-700 {
+      background-color: #121629 !important;
+    }
+    body.dark .bg-gray-800 {
+      background-color: #232946 !important;
+    }
+  </style>
+</body>
+</html>
